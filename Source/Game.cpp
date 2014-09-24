@@ -6,6 +6,7 @@
 
 CGame::CGame(){
 	estado = ESTADO_INICIANDO;
+	/////ACT3: Mal, esto debe de ir en el estado INICIANDO, no en el contructor.
 	if (SDL_Init(SDL_INIT_VIDEO)<0)
 	{
 		printf("No se pudo iniciar SDL:Error %s\n",SDL_GetError());

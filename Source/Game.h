@@ -17,8 +17,6 @@ public:
 	void Finalize();
 
 private:
-	
-
 	void Iniciando();
 	SDL_Surface * screen;
 	SDL_Surface *nave;
