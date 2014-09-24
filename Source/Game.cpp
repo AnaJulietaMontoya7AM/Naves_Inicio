@@ -8,7 +8,7 @@ CGame::CGame(){
 	estado = ESTADO_INICIANDO;
 	if (SDL_Init(SDL_INIT_VIDEO)<0)
 	{
-		printf("No se pudo iniciar SDL: %s\n",SDL_GetError());
+		printf("No se pudo iniciar SDL:Error %s\n",SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
 
@@ -18,14 +18,15 @@ CGame::CGame(){
 		printf("No se puede inicializar el modo grafico: \n", SDL_GetError());
 		exit(1);
 	}
-
-
+	SDL_WM_SetCaption( "Mi primer Juego", NULL );
+	atexit(SDL_Quit);
 }
 
 
 
 // Con esta función eliminaremos todos los elementos en pantalla
 void CGame::Finalize(){
+	SDL_Quit();
 }
 
 bool CGame::Start()
