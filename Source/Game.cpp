@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Game.h"
+#include "Header.h"
 #include <SDL.h>
 #include <SDL_image.h>
 
@@ -10,23 +11,33 @@ CGame::CGame(){
 	if (SDL_Init(SDL_INIT_VIDEO)<0)
 	{
 		printf("No se pudo iniciar SDL:Error %s\n",SDL_GetError());
+		getchar();
 		exit(EXIT_FAILURE);
 	}
 
-	screen= SDL_SetVideoMode(640,480,24,SDL_HWSURFACE);
+	screen= SDL_SetVideoMode(WIDTH_SCREEN, HEIGHT_SCREEN, 24, SDL_SWSURFACE );
 	if (screen==NULL)
 	{
 		printf("No se puede inicializar el modo grafico: \n", SDL_GetError());
-		exit(1);
+		getchar();
+		exit(1); 
 	}
 	SDL_WM_SetCaption( "Mi primer Juego", NULL );
 	atexit(SDL_Quit);
+	
+	nave=new Nave(screen,"../Data/MiNave.bmp");
+
+	//delete nave;
+
 }
 
 
-
+void CGame::Iniciando(){
+}
 // Con esta función eliminaremos todos los elementos en pantalla
 void CGame::Finalize(){
+	delete(nave);
+	SDL_FreeSurface(screen);
 	SDL_Quit();
 }
 
@@ -36,28 +47,30 @@ bool CGame::Start()
 	int salirJuego = false;
           
 	while (salirJuego == false){
-            
+		
 		//Maquina de estados
 		switch(estado){
 		case Estado::ESTADO_INICIANDO:
-			//Iniciando();
-			{
-				//nave=SDL_LoadBMP ("../data/MiNave.bmp");
-				nave= IMG_LoadJPG_RW(SDL_RWFromFile("../Data/cuadro.jpg","rb"));
-				SDL_Rect fuente;
-				fuente.x=583;
-				fuente.y=384;
-				fuente.w=323;
-				fuente.h=19;
-				SDL_Rect destino;
-				destino.x=100;
-				destino.y=100;
-				fuente.w=100;
-				fuente.h=fuente.h;
-				SDL_BlitSurface(nave,&fuente, screen, &destino);
-			}//INICIALIZAR
+			Iniciando();
+			estado= ESTADO_MENU;
+
 			break;
 		case Estado:: ESTADO_MENU:
+			//nave->PintarModulo(0,0,0,64,64);
+			//nave->PintarModulo(0,0,0);
+			SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format,0,0,0));//Limpia la imagen
+			keys=SDL_GetKeyState(NULL);
+			if(keys[SDLK_RIGHT]){
+				nave->Mover(1);
+
+				
+			}
+
+			if (keys[SDLK_LEFT])
+			{
+				nave->Mover(-1);
+			}
+			nave->Pintar();
 			break;
 		case Estado::ESTADO_JUGANDO:
 			break;
@@ -67,7 +80,13 @@ bool CGame::Start()
 				salirJuego = true;
 			break;
 		};
-		SDL_Flip(screen);
+		while (SDL_PollEvent(&event))//Aqui SDL creara una lista de eventos ocurridos
+		{
+			if (event.type==SDL_QUIT) {salirJuego=true;}//Si se detecta una salida de SDL o...
+			if(event.type==SDL_KEYDOWN){ }
+
+		}
+		SDL_Flip(screen);//Este codigo estara provicionalmente aqui
     }
 	return true;
 }
