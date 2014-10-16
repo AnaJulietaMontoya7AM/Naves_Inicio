@@ -6,8 +6,15 @@
 #include <SDL_image.h>
 
 CGame::CGame(){
-	estado = ESTADO_INICIANDO;
-	/////ACT3: Mal, esto debe de ir en el estado INICIANDO, no en el contructor.
+	ESTADO_INICIANDO;
+	Iniciando();
+	//delete nave;
+
+}
+
+
+void CGame::Iniciando(){
+	
 	if (SDL_Init(SDL_INIT_VIDEO)<0)
 	{
 		printf("No se pudo iniciar SDL:Error %s\n",SDL_GetError());
@@ -27,12 +34,7 @@ CGame::CGame(){
 	
 	nave=new Nave(screen,"../Data/MiNave.bmp");
 
-	//delete nave;
-
-}
-
-
-void CGame::Iniciando(){
+	estado = ESTADO_INICIANDO;
 }
 // Con esta función eliminaremos todos los elementos en pantalla
 void CGame::Finalize(){
@@ -86,7 +88,7 @@ bool CGame::Start()
 			if(event.type==SDL_KEYDOWN){ }
 
 		}
-		SDL_Flip(screen);//Este codigo estara provicionalmente aqui
+		SDL_Flip(screen);
     }
 	return true;
 }
