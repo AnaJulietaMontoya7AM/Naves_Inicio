@@ -6,15 +6,14 @@
 #include <SDL_image.h>
 
 CGame::CGame(){
-	ESTADO_INICIANDO;
-	Iniciando();
+	estado=ESTADO_INICIANDO;///ACT3 MAL: Debes de indicar cual es tu estado inicial.
+	//Iniciando();///ACT3 MAL: Este codigo no va aqui, para esto tienes el estado iniciando.
 	//delete nave;
-
 }
 
 
 void CGame::Iniciando(){
-	
+
 	if (SDL_Init(SDL_INIT_VIDEO)<0)
 	{
 		printf("No se pudo iniciar SDL:Error %s\n",SDL_GetError());
@@ -31,10 +30,10 @@ void CGame::Iniciando(){
 	}
 	SDL_WM_SetCaption( "Mi primer Juego", NULL );
 	atexit(SDL_Quit);
-	
+
 	nave=new Nave(screen,"../Data/MiNave.bmp");
 
-	estado = ESTADO_INICIANDO;
+	//estado = ESTADO_INICIANDO;// ACT3: MAL Va en el constructor.
 }
 // Con esta función eliminaremos todos los elementos en pantalla
 void CGame::Finalize(){
@@ -47,13 +46,13 @@ bool CGame::Start()
 {
 	// Esta variable nos ayudara a controlar la salida del juego...
 	int salirJuego = false;
-          
+
 	while (salirJuego == false){
-		
+
 		//Maquina de estados
 		switch(estado){
 		case Estado::ESTADO_INICIANDO:
-			Iniciando();
+			Iniciando();//ACT3: Bien.
 			estado= ESTADO_MENU;
 
 			break;
@@ -64,8 +63,6 @@ bool CGame::Start()
 			keys=SDL_GetKeyState(NULL);
 			if(keys[SDLK_RIGHT]){
 				nave->Mover(1);
-
-				
 			}
 
 			if (keys[SDLK_LEFT])
@@ -79,7 +76,7 @@ bool CGame::Start()
 		case Estado::ESTADO_TERMINANDO:
 			break;
 		case Estado::ESTADO_FINALIZANDO: //SALIR
-				salirJuego = true;
+			salirJuego = true;
 			break;
 		};
 		while (SDL_PollEvent(&event))//Aqui SDL creara una lista de eventos ocurridos
@@ -89,6 +86,6 @@ bool CGame::Start()
 
 		}
 		SDL_Flip(screen);
-    }
+	}
 	return true;
 }
