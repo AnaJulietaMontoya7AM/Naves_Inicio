@@ -24,6 +24,7 @@ private:
 	SDL_Event event;//La variabe event es un tipo de evento de SDL para monitorizar el teclado
 	SDL_Surface * screen;
 	Nave * nave;
+	Nave*enemigo;
 	Estado estado;
 
 };

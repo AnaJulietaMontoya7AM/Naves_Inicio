@@ -1,11 +1,23 @@
 #include "Nave.h"
 #include "Header.h"
 
-Nave:: Nave(SDL_Surface*screen, char * rutaImagen){
+Nave:: Nave(SDL_Surface*screen, char * rutaImagen, int x, int y){
 	sprite=new Sprite(screen);
 	sprite->CargarImagen(rutaImagen);
-	x=(WIDTH_SCREEN/2)-(sprite->WidthModulo(0)/2);//Ancho
-	y=(HEIGHT_SCREEN-80)-(sprite->HeightModulo(0));//Alto
+	this->x=x;
+	this->y=y;
+	autoMovimiento=false;
+
+}
+
+void Nave::SetAutoMovimiento(bool autoMovimiento){
+	this->autoMovimiento=autoMovimiento;
+}
+
+void Nave::Actualizar(){
+	if(autoMovimiento){
+		Mover(1);
+	}
 }
 
 void Nave::Pintar(){
@@ -13,4 +25,8 @@ void Nave::Pintar(){
 }
 void Nave::Mover(int posicion){
 	x+=posicion;
+}
+
+void Nave::Mover2(int posicion){
+	y+=posicion;
 }
