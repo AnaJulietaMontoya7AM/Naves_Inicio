@@ -6,15 +6,14 @@
 #include <SDL_image.h>
 
 CGame::CGame(){
-	ESTADO_INICIANDO;
-	Iniciando();
+	estado=ESTADO_INICIANDO;///ACT3 MAL: Debes de indicar cual es tu estado inicial.
+	//Iniciando();///ACT3 MAL: Este codigo no va aqui, para esto tienes el estado iniciando.
 	//delete nave;
-
 }
 
 
 void CGame::Iniciando(){
-	
+
 	if (SDL_Init(SDL_INIT_VIDEO)<0)
 	{
 		printf("No se pudo iniciar SDL:Error %s\n",SDL_GetError());
@@ -32,11 +31,15 @@ void CGame::Iniciando(){
 	SDL_WM_SetCaption( "Mi primer Juego", NULL );
 	atexit(SDL_Quit);
 
+<<<<<<< HEAD
 	nave=new Nave(screen,"../Data/MiNave.bmp",(WIDTH_SCREEN/2)/*-(sprite->WidthModulo(0)/2))*/,(HEIGHT_SCREEN-80)/*-(sprite->HeightModulo(0)*/);
 	enemigo=new Nave(screen,"../Data/enemigo.bmp",0,0);
 	enemigo->SetAutoMovimiento(true);
+=======
+	nave=new Nave(screen,"../Data/MiNave.bmp");
+>>>>>>> origin/master
 
-	estado = ESTADO_INICIANDO;
+	//estado = ESTADO_INICIANDO;// ACT3: MAL Va en el constructor.
 }
 // Con esta función eliminaremos todos los elementos en pantalla
 void CGame::Finalize(){
@@ -49,14 +52,22 @@ bool CGame::Start()
 {
 	// Esta variable nos ayudara a controlar la salida del juego...
 	int salirJuego = false;
+<<<<<<< HEAD
           int Bandera=0;
+=======
+
+>>>>>>> origin/master
 	while (salirJuego == false){
-		
+
 		//Maquina de estados
 		switch(estado){
 		case Estado::ESTADO_INICIANDO:
+<<<<<<< HEAD
 			printf("\n1.EstadoIniciando");
 			Iniciando();
+=======
+			Iniciando();//ACT3: Bien.
+>>>>>>> origin/master
 			estado= ESTADO_MENU;
 			break;
 		case Estado:: ESTADO_MENU:
@@ -106,10 +117,15 @@ bool CGame::Start()
 			printf("\n4.EstadoTerminando");
 			estado=ESTADO_MENU;
 			break;
+<<<<<<< HEAD
 		case Estado::ESTADO_FINALIZANDO:
 			printf("\n5.EstadoFinalizando");
 			getchar();
 				salirJuego = true;
+=======
+		case Estado::ESTADO_FINALIZANDO: //SALIR
+			salirJuego = true;
+>>>>>>> origin/master
 			break;
 		};
 		while (SDL_PollEvent(&event))//Aqui SDL creara una lista de eventos ocurridos
@@ -119,6 +135,6 @@ bool CGame::Start()
 
 		}
 		SDL_Flip(screen);
-    }
+	}
 	return true;
 }
