@@ -5,7 +5,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-CGame::CGame(){
+CGame::CGame()
+{
+	tiempoFrameInicial=0;
 	estado=ESTADO_INICIANDO;///ACT3 MAL: Debes de indicar cual es tu estado inicial.
 	//Iniciando();///ACT3 MAL: Este codigo no va aqui, para esto tienes el estado iniciando.
 	//delete nave;
@@ -21,7 +23,7 @@ void CGame::Iniciando(){
 		exit(EXIT_FAILURE);
 	}
 
-	screen= SDL_SetVideoMode(WIDTH_SCREEN, HEIGHT_SCREEN, 24, SDL_SWSURFACE );
+	screen= SDL_SetVideoMode(WIDTH_SCREEN, HEIGHT_SCREEN, 24, SDL_HWSURFACE );
 	if (screen==NULL)
 	{
 		printf("No se puede inicializar el modo grafico: \n", SDL_GetError());
@@ -31,19 +33,34 @@ void CGame::Iniciando(){
 	SDL_WM_SetCaption( "Mi primer Juego", NULL );
 	atexit(SDL_Quit);
 
-<<<<<<< HEAD
+
 	nave=new Nave(screen,"../Data/MiNave.bmp",(WIDTH_SCREEN/2)/*-(sprite->WidthModulo(0)/2))*/,(HEIGHT_SCREEN-80)/*-(sprite->HeightModulo(0)*/);
 	enemigo=new Nave(screen,"../Data/enemigo.bmp",0,0);
-	enemigo->SetAutoMovimiento(true);
-=======
-	nave=new Nave(screen,"../Data/MiNave.bmp");
->>>>>>> origin/master
+
+	for(int i=0;i<10;i++)
+	{
+		enemigoArreglo[i]=new Nave(screen,"../Data/enemigo.bmp",i*60,0);
+		enemigoArreglo[i]->SetAutoMovimiento(false);
+		enemigoArreglo[i]->SetPasoLimite(4);
+
+	}
+
+	tick=0;
+
+	enemigo->SetAutoMovimiento(false);
+	enemigo->SetPasoLimite(4);
+
+	
+
 
 	//estado = ESTADO_INICIANDO;// ACT3: MAL Va en el constructor.
 }
 // Con esta función eliminaremos todos los elementos en pantalla
 void CGame::Finalize(){
 	delete(nave);
+	//delete(keys);
+	delete(enemigo);
+	delete *enemigoArreglo;
 	SDL_FreeSurface(screen);
 	SDL_Quit();
 }
@@ -52,22 +69,20 @@ bool CGame::Start()
 {
 	// Esta variable nos ayudara a controlar la salida del juego...
 	int salirJuego = false;
-<<<<<<< HEAD
-          int Bandera=0;
-=======
 
->>>>>>> origin/master
+          int Bandera=0;
+
 	while (salirJuego == false){
 
 		//Maquina de estados
 		switch(estado){
 		case Estado::ESTADO_INICIANDO:
-<<<<<<< HEAD
+
 			printf("\n1.EstadoIniciando");
 			Iniciando();
-=======
+
 			Iniciando();//ACT3: Bien.
->>>>>>> origin/master
+
 			estado= ESTADO_MENU;
 			break;
 		case Estado:: ESTADO_MENU:
@@ -84,29 +99,37 @@ bool CGame::Start()
 			break;
 		case Estado::ESTADO_JUGANDO:
 			enemigo->Actualizar();
-			//nave->PintarModulo(0,0,0,64,64);
-			//nave->PintarModulo(0,0,0);
+			for (int i = 0; i <10; i++)
+			{
+				enemigoArreglo[i]->Actualizar();
+			}
+			MoverEnemigo();
 			SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format,0,0,0));//Limpia la imagen
 			keys=SDL_GetKeyState(NULL);
 			if(keys[SDLK_RIGHT]){
-				nave->Mover(1);
+				if(!EsLimitePantalla(nave,BORDE_DERECHO))
+				nave->Mover(15);
 			}
 
 			if (keys[SDLK_LEFT])
 			{
-				nave->Mover(-1);
+				nave->Mover(-15);
 			}
 			if(keys[SDLK_UP])
 			{
-				nave->Mover2(-1);
+				nave->Mover2(-15);
 			}
 
 			if(keys[SDLK_DOWN])
 			{
-				nave->Mover2(1);
+				nave->Mover2(15);
 			}
 			nave->Pintar();
 			enemigo->Pintar();
+			for(int i=0; i<10; i++)
+			{
+			enemigoArreglo[i]->Pintar();
+			}
 			if (keys[SDLK_0])
 			{
 				printf("\n3.EstadoJugando");
@@ -117,15 +140,14 @@ bool CGame::Start()
 			printf("\n4.EstadoTerminando");
 			estado=ESTADO_MENU;
 			break;
-<<<<<<< HEAD
+
 		case Estado::ESTADO_FINALIZANDO:
 			printf("\n5.EstadoFinalizando");
 			getchar();
 				salirJuego = true;
-=======
-		case Estado::ESTADO_FINALIZANDO: //SALIR
-			salirJuego = true;
->>>>>>> origin/master
+
+	
+
 			break;
 		};
 		while (SDL_PollEvent(&event))//Aqui SDL creara una lista de eventos ocurridos
@@ -135,6 +157,86 @@ bool CGame::Start()
 
 		}
 		SDL_Flip(screen);
+		tiempoFrameFinal=SDL_GetTicks();
+		while(tiempoFrameFinal<(tiempoFrameInicial + FPS_DELAY))
+		{
+		
+			tiempoFrameFinal=SDL_GetTicks();
+			SDL_Delay(1);
+		}
+		printf("Frames:%dTiempo: %dTiempo promedio: %fTiempo por frame: %d FPS:%f\n",tick,SDL_GetTicks(),(float)SDL_GetTicks()/(float)tick,tiempoFrameFinal-tiempoFrameInicial,1000.0f/(float)(tiempoFrameFinal-tiempoFrameInicial));
+		tiempoFrameInicial=tiempoFrameFinal;
+		tick++;
 	}
 	return true;
 }
+
+bool CGame::EsLimitePantalla(Nave * objeto,int bandera)
+{
+	if(bandera & BORDE_IZQUIERDO)
+	if (objeto->ObtenerX()<=0)
+		return true;
+	if(bandera&BORDE_SUPERIOR)
+	if (objeto->ObtenerY()<=0)
+		return true;
+	if(bandera & BORDE_DERECHO)
+	if (objeto->ObtenerX ()>= WIDTH_SCREEN-objeto->ObtenerW())
+		return true;
+	if(bandera & BORDE_INFERIOR)
+	if (objeto->ObtenerY ()>= HEIGHT_SCREEN-objeto->ObtenerH())
+		return true;
+	return false;
+	
+}
+
+void CGame::MoverEnemigo()
+{
+	if(enemigo->ObtenerPasoActual()==0)
+	    if(!EsLimitePantalla(enemigo,BORDE_DERECHO))
+		enemigo->Mover(15);//DERECHA
+		else{
+			enemigo->IncrementarPasoActual();
+	        enemigo->IncrementarPasoActual();
+			}
+	/*if(enemigo->ObtenerPasoActual()==1)
+		if(!EsLimitePantalla(enemigo,BORDE_INFERIOR))
+			enemigo->Mover(1);*/
+    if(enemigo->ObtenerPasoActual()==2)
+		if(!EsLimitePantalla(enemigo,BORDE_IZQUIERDO))
+			enemigo->Mover(-15);
+	else{
+			enemigo->IncrementarPasoActual();
+	        enemigo->IncrementarPasoActual();
+			}
+  /*if(enemigo->ObtenerPasoActual()==3)
+       if(!EsLimitePantalla(enemigo,BORDE_INFERIOR))
+		   enemigo->Mover(1);*/
+
+	for (int i = 0; i < 10; i++)
+	{
+		if(enemigoArreglo[i]->ObtenerPasoActual()==0)
+	    if(!EsLimitePantalla(enemigoArreglo[i],BORDE_DERECHO))
+	enemigoArreglo[i]->Mover(15);//DERECHA
+		else{
+			enemigoArreglo[i]->IncrementarPasoActual();
+	        enemigoArreglo[i]->IncrementarPasoActual();
+		}
+	/*if(enemigo->ObtenerPasoActual()==1)
+		if(!EsLimitePantalla(enemigo,BORDE_INFERIOR))
+			enemigo->Mover(1);*/
+		if(enemigoArreglo[i]->ObtenerPasoActual()==2)
+		if(!EsLimitePantalla(enemigoArreglo[i],BORDE_IZQUIERDO))
+			enemigoArreglo[i]->Mover(-15);
+		else
+		{
+			enemigoArreglo[i]->IncrementarPasoActual();
+	        enemigoArreglo[i]->IncrementarPasoActual();
+		}
+  /*if(enemigo->ObtenerPasoActual()==3)
+       if(!EsLimitePantalla(enemigo,BORDE_INFERIOR))
+		   enemigo->Mover(1);*/
+	
+
+	}
+	
+	}
