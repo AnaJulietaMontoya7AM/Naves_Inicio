@@ -13,6 +13,8 @@ Sprite::~Sprite(){
 }
 	void  Sprite::CargarImagen(char * path){
 		imagen = SDL_LoadBMP(path);
+		//Fondo de nave transparente
+		SDL_SetColorKey(imagen, SDL_SRCCOLORKEY | SDL_RLEACCEL, SDL_MapRGB(imagen-> format, 255, 0,255));
 	}
 
 	//void Sprite::PintarModulo(int nombre,int x ,int y, int w, int h)
