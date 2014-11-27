@@ -1,4 +1,6 @@
+#pragma once
 #include <SDL.h>
+#include "Objeto.h"
 #include "Nave.h"
 
 class CGame
@@ -22,7 +24,7 @@ private:
 	void Menu();
 	void Iniciando();
 	void MoverEnemigo();
-	bool EsLimitePantalla(Nave * objeto,int bandera);
+	bool EsLimitePantalla(Objeto * objeto,int bandera);
 
 	int opcionSeleccionada;
 	Uint8*keys;//Esta variable sirve para ver si determinadas teclas estan o no pulsadas
@@ -30,12 +32,14 @@ private:
 	SDL_Surface * screen;
 
 	Nave * nave;
-	Nave *enemigo;
-	Nave *enemigoArreglo[10];
+	//Nave *enemigo;
+	Objeto *enemigoArreglo[10];
 
-	Nave*menu;//Fondo del menu
-	Nave*textos;//Textos deljuego
-	Nave*fondo;//Fondo del juego
+	Objeto*menu;//Fondo del menu
+	Objeto*textos;//Textos deljuego
+	Objeto*fondo;//Fondo del juego
+
+
 
 	int tick;
 	int tiempoFrameInicial;

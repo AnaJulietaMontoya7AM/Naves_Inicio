@@ -35,13 +35,14 @@ void CGame::Iniciando(){
 
 
 	nave=new Nave(screen,"../Data/MiNave.bmp",(WIDTH_SCREEN/2),(HEIGHT_SCREEN-80,0),MODULE_MINAVE_NAVE);
-	menu=new Nave(screen,"../Data/Fondo.bmp",0,0,MODULE_MENU_FONDO);
-	textos=new Nave(screen,"../Data/Menu.bmp",0,0,-1);
-	enemigo=new Nave(screen,"../Data/enemigo.bmp",0,0,2);
+	menu=new Objeto(screen,"../Data/Fondo.bmp",0,0,MODULE_MENU_FONDO);
+	textos=new Objeto(screen,"../Data/Menu.bmp",0,0,-1);
+	//enemigo=new Nave(screen,"../Data/enemigo.bmp",0,0,2);
+	fondo=new Objeto(screen,"../Data/Fondo.bmp",0,0,MODULE_MENU_FONDO);
 
 	for(int i=0;i<10;i++)
 	{
-		enemigoArreglo[i]=new Nave(screen,"../Data/enemigo.bmp",i*60,0,MODULE_ENEMIGO_NAVE);
+		enemigoArreglo[i]=new Objeto(screen,"../Data/enemigo.bmp",i*60,0,MODULE_ENEMIGO_NAVE);
 		enemigoArreglo[i]->SetAutoMovimiento(false);
 		enemigoArreglo[i]->SetPasoLimite(4);
 
@@ -50,8 +51,8 @@ void CGame::Iniciando(){
 	tick=0;
 	opcionSeleccionada=MODULE_TEXTO_MENU_OPCION1;
 
-	enemigo->SetAutoMovimiento(false);
-	enemigo->SetPasoLimite(4);
+	//enemigo->SetAutoMovimiento(false);
+	//enemigo->SetPasoLimite(4);
 
 	
 
@@ -62,7 +63,7 @@ void CGame::Iniciando(){
 void CGame::Finalize(){
 	delete(nave);
 	//delete(keys);
-	delete(enemigo);
+	//delete(enemigo);
 	delete *enemigoArreglo;
 	SDL_FreeSurface(screen);
 	SDL_Quit();
@@ -83,6 +84,7 @@ bool CGame::Start()
 
 			Iniciando();//ACT3: Bien.
 
+			//estado= ESTADO_JUGANDO;
 			estado= ESTADO_MENU;
 			break;
 		case Estado:: ESTADO_MENU:
@@ -94,34 +96,35 @@ bool CGame::Start()
 				//estado=ESTADO_JUGANDO;
 			break;
 		case Estado::ESTADO_JUGANDO:
-			enemigo->Actualizar();
+			//enemigo->Actualizar();
 			for (int i = 0; i <10; i++)
 			{
 				enemigoArreglo[i]->Actualizar();
 			}
 			MoverEnemigo();
-			SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format,0,0,0));//Limpia la imagen
+			fondo->Pintar();
+			//SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format,0,0,0));//Limpia la imagen
 			keys=SDL_GetKeyState(NULL);
 			if(keys[SDLK_RIGHT]){
-				if(!EsLimitePantalla(nave,BORDE_DERECHO))
-				nave->Mover(15);
+				if(!EsLimitePantalla(nave->GetNaveObjeto(),BORDE_DERECHO))
+					nave->MoverDerecho();
 			}
 
 			if (keys[SDLK_LEFT])
 			{
-				nave->Mover(-15);
+				nave->MoverIzquierdo();
 			}
 			if(keys[SDLK_UP])
 			{
-				nave->Mover2(-15);
+				nave->MoverArriba();
 			}
 
 			if(keys[SDLK_DOWN])
 			{
-				nave->Mover2(15);
+				nave->MoverAbajo();
 			}
 			nave->Pintar();
-			enemigo->Pintar();
+			//enemigo->Pintar();
 			for(int i=0; i<10; i++)
 			{
 			enemigoArreglo[i]->Pintar();
@@ -138,8 +141,8 @@ bool CGame::Start()
 			break;
 
 		case Estado::ESTADO_FINALIZANDO:
-			printf("\n5.EstadoFinalizando");
-			getchar();
+			/*printf("\n5.EstadoFinalizando");
+			getchar();*/
 				salirJuego = true;
 
 	
@@ -167,7 +170,7 @@ bool CGame::Start()
 	return true;
 }
 
-bool CGame::EsLimitePantalla(Nave * objeto,int bandera)
+bool CGame::EsLimitePantalla(Objeto * objeto,int bandera)
 {
 	if(bandera & BORDE_IZQUIERDO)
 	if (objeto->ObtenerX()<=0)
@@ -187,23 +190,23 @@ bool CGame::EsLimitePantalla(Nave * objeto,int bandera)
 
 void CGame::MoverEnemigo()
 {
-	if(enemigo->ObtenerPasoActual()==0)
-	    if(!EsLimitePantalla(enemigo,BORDE_DERECHO))
-		enemigo->Mover(15);//DERECHA
-		else{
-			enemigo->IncrementarPasoActual();
-	        enemigo->IncrementarPasoActual();
-			}
+	//if(enemigo->ObtenerPasoActual()==0)
+	//    if(!EsLimitePantalla(enemigo,BORDE_DERECHO))
+	//	enemigo->Mover(15);//DERECHA
+	//	else{
+	//		enemigo->IncrementarPasoActual();
+	//        enemigo->IncrementarPasoActual();
+	//		}
 	/*if(enemigo->ObtenerPasoActual()==1)
 		if(!EsLimitePantalla(enemigo,BORDE_INFERIOR))
 			enemigo->Mover(1);*/
-    if(enemigo->ObtenerPasoActual()==2)
+   /* if(enemigo->ObtenerPasoActual()==2)
 		if(!EsLimitePantalla(enemigo,BORDE_IZQUIERDO))
 			enemigo->Mover(-15);
 	else{
 			enemigo->IncrementarPasoActual();
 	        enemigo->IncrementarPasoActual();
-			}
+			}*/
   /*if(enemigo->ObtenerPasoActual()==3)
        if(!EsLimitePantalla(enemigo,BORDE_INFERIOR))
 		   enemigo->Mover(1);*/
@@ -254,6 +257,17 @@ void CGame:: Menu()
 {
 	for(int i= MODULE_TEXTO_MENU_OPCION1, j=0;i<= MODULE_TEXTO_MENU_OPCION2; i++,j++)
 	{
+		keys=SDL_GetKeyState(NULL);
+		if(keys[SDLK_UP])
+		{
+			opcionSeleccionada=MODULE_TEXTO_MENU_OPCION1;
+		}
+
+		if (keys[SDLK_DOWN])
+		{
+			opcionSeleccionada=MODULE_TEXTO_MENU_OPCION2;
+		}
+
 		if (i==opcionSeleccionada)
 		{
 			textos->Pintar(i+2,200,180+(j*80));
@@ -261,6 +275,19 @@ void CGame:: Menu()
 		else
 			{
 				textos->Pintar(i,200,180+(j*80));
+		}
+
+		if(keys[SDLK_KP_ENTER])
+		{
+			if(opcionSeleccionada==MODULE_TEXTO_MENU_OPCION1)
+			{
+				estado=ESTADO_JUGANDO;
+			}
+
+			else
+			{
+				estado=ESTADO_FINALIZANDO;
+			}
 		}
 	}
 }
