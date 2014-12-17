@@ -25,6 +25,11 @@
 #define MODULE_TEXTO_MENU_OPCION2			   6
 #define MODULE_TEXTO_MENU_OPCION1_SELECCIONADO 7
 #define MODULE_TEXTO_MENU_OPCION2_SELECCIONADO 8
+#define MODULE_BALAS_BALA                      9
+
+#define MAXIMO_DE_BALAS  30
+#define NAVE_PROPIA       0
+#define NAVE_ENEMIGO      1
 
 
 #endif 

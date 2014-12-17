@@ -57,5 +57,11 @@ SpriteDef::SpriteDef(){
 	Modulos[8].w= 69;
 	Modulos[8].h= 28;
 
+	Modulos[9].id=MODULE_BALAS_BALA;
+	Modulos[9].x=0;
+	Modulos[9].y=0;
+	Modulos[9].w=5;
+	Modulos[9].h=5;
+
 
 }

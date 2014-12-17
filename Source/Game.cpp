@@ -34,17 +34,17 @@ void CGame::Iniciando(){
 	atexit(SDL_Quit);
 
 
-	nave=new Nave(screen,"../Data/MiNave.bmp",(WIDTH_SCREEN/2),(HEIGHT_SCREEN-80,0),MODULE_MINAVE_NAVE);
+	nave=new Nave(screen,"../Data/MiNave.bmp",(WIDTH_SCREEN/2),(HEIGHT_SCREEN-80),MODULE_MINAVE_NAVE);
 	menu=new Objeto(screen,"../Data/Fondo.bmp",0,0,MODULE_MENU_FONDO);
 	textos=new Objeto(screen,"../Data/Menu.bmp",0,0,-1);
 	//enemigo=new Nave(screen,"../Data/enemigo.bmp",0,0,2);
 	fondo=new Objeto(screen,"../Data/Fondo.bmp",0,0,MODULE_MENU_FONDO);
 
-	for(int i=0;i<10;i++)
+	for(int i=0;i<10;i++) 
 	{
-		enemigoArreglo[i]=new Objeto(screen,"../Data/enemigo.bmp",i*60,0,MODULE_ENEMIGO_NAVE);
-		enemigoArreglo[i]->SetAutoMovimiento(false);
-		enemigoArreglo[i]->SetPasoLimite(4);
+		enemigoArreglo[i]=new Nave(screen,"../Data/enemigo.bmp",i*60,0,MODULE_ENEMIGO_NAVE);
+		enemigoArreglo[i]->GetNaveObjeto()->SetAutoMovimiento(false);
+		enemigoArreglo[i]->GetNaveObjeto()->SetPasoLimite(4);
 
 	}
 
@@ -82,7 +82,10 @@ bool CGame::Start()
 		switch(estado){
 		case Estado::ESTADO_INICIANDO:
 
+
 			Iniciando();//ACT3: Bien.
+
+			InicializandoStage();
 
 			//estado= ESTADO_JUGANDO;
 			estado= ESTADO_MENU;
@@ -95,11 +98,17 @@ bool CGame::Start()
 		
 				//estado=ESTADO_JUGANDO;
 			break;
+		case Estado::ESTADO_PRE_JUGANDO:
+			nivelActual=0;
+			Vida=1;
+			enemigosEliminados=0;
+			estado=ESTADO_JUGANDO;
+			break;
 		case Estado::ESTADO_JUGANDO:
 			//enemigo->Actualizar();
-			for (int i = 0; i <10; i++)
+			for (int i = 0; i <nivel[nivelActual].NumeroEnemigosVisibles; i++)
 			{
-				enemigoArreglo[i]->Actualizar();
+				enemigoArreglo[i]->GetNaveObjeto()->Actualizar();
 			}
 			MoverEnemigo();
 			fondo->Pintar();
@@ -107,27 +116,75 @@ bool CGame::Start()
 			keys=SDL_GetKeyState(NULL);
 			if(keys[SDLK_RIGHT]){
 				if(!EsLimitePantalla(nave->GetNaveObjeto(),BORDE_DERECHO))
-					nave->MoverDerecho();
+					nave->MoverDerecho(nivel[nivelActual].VelocidadNavePropia);
 			}
 
 			if (keys[SDLK_LEFT])
 			{
-				nave->MoverIzquierdo();
+				nave->MoverIzquierdo(nivel[nivelActual].VelocidadNavePropia);
 			}
 			if(keys[SDLK_UP])
 			{
-				nave->MoverArriba();
+				nave->MoverArriba(nivel[nivelActual].VelocidadNavePropia);
 			}
 
 			if(keys[SDLK_DOWN])
 			{
-				nave->MoverAbajo();
+				nave->MoverAbajo(nivel[nivelActual].VelocidadNavePropia);
 			}
-			nave->Pintar();
-			//enemigo->Pintar();
-			for(int i=0; i<10; i++)
+			if (keys[SDLK_SPACE])
 			{
-			enemigoArreglo[i]->Pintar();
+				nave->Disparar(NAVE_PROPIA, nivel[nivelActual].balasMaximas);
+			}
+			//////SIMULACION COLICIONES////////////
+			if (keys[SDLK_x])//BALA ENEMIGO/NUESTRA NAVE
+			{
+				nave->simularColision(true);
+			}
+			if (keys[SDLK_c])//NUESTRA VALA/NAVE ENEMIGO
+			{
+				int enemigoAEliminar=rand()%nivel[nivelActual].NumeroEnemigosVisibles;
+				enemigoArreglo[enemigoAEliminar]->simularColision(true);
+			}
+			if (keys[SDLK_v])//NUESTRA NAVE/NAVE ENEMIGO
+			{
+
+			}
+			//////////CONTROL DE COLICIONES//////////
+			for(int i=0;i<nivel[nivelActual].NumeroEnemigosVisibles;i++)
+			{
+				if(enemigoArreglo[i]->estaColisionandoConBala(nave))
+					Vida--;
+				if(nave->estaColisionandoConBala(enemigoArreglo[i]))
+				{
+					enemigoArreglo[i]->setVisible(false);
+					enemigosEliminados++;
+					nave->simularColision(false);
+					if (enemigosEliminados < nivel[nivelActual].NumeroEnemigosAEliminar)
+					{
+						enemigoArreglo[i]->CrearNuevo();
+					}
+				}
+
+			}
+
+
+			////////////////////////////////////////
+
+			if (Vida<=0)
+				estado=ESTADO_TERMINANDO;
+			if(enemigosEliminados>=nivel[nivelActual].NumeroEnemigosAEliminar){
+				nivelActual++;
+			//CARGAR OTRO FONDO;
+
+
+		}
+			nave->Pintar(NAVE_PROPIA);
+			//enemigo->Pintar();
+			for(int i=0; i<nivel[nivelActual].NumeroEnemigosVisibles; i++)
+			{
+				enemigoArreglo[i]->Pintar(NAVE_ENEMIGO);
+			enemigoArreglo[i]->AutoDisparar(nivel[nivelActual].balasMaximas);
 			}
 			if (keys[SDLK_0])
 			{
@@ -211,41 +268,42 @@ void CGame::MoverEnemigo()
        if(!EsLimitePantalla(enemigo,BORDE_INFERIOR))
 		   enemigo->Mover(1);*/
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i <nivel[nivelActual].NumeroEnemigosVisibles; i++)
 	{
-		if(enemigoArreglo[i]->ObtenerPasoActual()==0)
-	    if(!EsLimitePantalla(enemigoArreglo[i],BORDE_DERECHO))
-	enemigoArreglo[i]->Mover(15);//DERECHA
+
+		if(enemigoArreglo[i]->GetNaveObjeto()->ObtenerPasoActual()==0)
+			if(!EsLimitePantalla(enemigoArreglo[i]->GetNaveObjeto(),BORDE_DERECHO))
+				enemigoArreglo[i]->GetNaveObjeto()->Mover(nivel[nivelActual].VelocidadNaveEnemigo);//DERECHA
 		else{
-			enemigoArreglo[i]->IncrementarPasoActual();
+			enemigoArreglo[i]->GetNaveObjeto()->IncrementarPasoActual();
 	       // enemigoArreglo[i]->IncrementarPasoActual();
 		}
 
-	if(enemigoArreglo[i]->ObtenerPasoActual()==1)
-		if(!EsLimitePantalla(enemigoArreglo[i],BORDE_INFERIOR))
-			enemigoArreglo[i]->Mover2(15);
+		if(enemigoArreglo[i]->GetNaveObjeto()->ObtenerPasoActual()==1)
+		if(!EsLimitePantalla(enemigoArreglo[i]->GetNaveObjeto(),BORDE_INFERIOR))
+			enemigoArreglo[i]->GetNaveObjeto()->Mover2(nivel[nivelActual].VelocidadNaveEnemigo);
 		else
 		{
-			enemigoArreglo[i]->IncrementarPasoActual();
+			enemigoArreglo[i]->GetNaveObjeto()->IncrementarPasoActual();
 		}
 
-		if(enemigoArreglo[i]->ObtenerPasoActual()==2)
+		if(enemigoArreglo[i]->GetNaveObjeto()->ObtenerPasoActual()==2)
 
 
-		if(!EsLimitePantalla(enemigoArreglo[i],BORDE_IZQUIERDO))
-			enemigoArreglo[i]->Mover(-15);
+		if(!EsLimitePantalla(enemigoArreglo[i]->GetNaveObjeto(),BORDE_IZQUIERDO))
+			enemigoArreglo[i]->GetNaveObjeto()->Mover(-nivel[nivelActual].VelocidadNaveEnemigo);
 		else
 		{
 			//enemigoArreglo[i]->IncrementarPasoActual();
-	        enemigoArreglo[i]->IncrementarPasoActual();
+	        enemigoArreglo[i]->GetNaveObjeto()->IncrementarPasoActual();
 		}
 
-  if(enemigoArreglo[i]->ObtenerPasoActual()==3)
-       if(!EsLimitePantalla(enemigoArreglo[i],BORDE_SUPERIOR))
-		   enemigoArreglo[i]->Mover2(-15);
+  if(enemigoArreglo[i]->GetNaveObjeto()->ObtenerPasoActual()==3)
+       if(!EsLimitePantalla(enemigoArreglo[i]->GetNaveObjeto(),BORDE_SUPERIOR))
+		   enemigoArreglo[i]->GetNaveObjeto()->Mover2(-nivel[nivelActual].VelocidadNaveEnemigo);
 	   else
 	   {
-		   enemigoArreglo[i]->IncrementarPasoActual();
+		   enemigoArreglo[i]->GetNaveObjeto()->IncrementarPasoActual();
 	   }
 	
 
@@ -281,7 +339,7 @@ void CGame:: Menu()
 		{
 			if(opcionSeleccionada==MODULE_TEXTO_MENU_OPCION1)
 			{
-				estado=ESTADO_JUGANDO;
+				estado=ESTADO_PRE_JUGANDO;
 			}
 
 			else
